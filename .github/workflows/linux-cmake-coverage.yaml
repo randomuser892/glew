@@ -1,0 +1,55 @@
+name: Ubuntu Linux cmake Coverage Build
+on: [push]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies
+        run: |
+          apt update
+          apt install -y cmake ninja-build libxmu-dev libxi-dev libgl-dev libegl1-mesa-dev dos2unix gcovr lcov
+      
+      - name: Git Checkout
+        uses: actions/checkout@v4
+      
+      - name: Generate Code
+        run: |
+          make -C auto clobber
+          make extensions
+          make dist-src
+      
+      - name: Build with Coverage
+        run: |
+          mkdir build_coverage
+          cmake build/cmake -B build_coverage -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DGLEW_X11=Y \
+            -DGLEW_EGL=N \
+            -DBUILD_SHARED_LIBS=Y \
+            -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+            -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+          cmake --build build_coverage
+      
+      - name: Install Libraries
+        run: |
+          cmake --install build_coverage --prefix ${PWD}/out
+      
+      - name: Build Test Program
+        run: |
+          cmake -H build/cmake/testbuild -B build_test \
+            -DCMAKE_PREFIX_PATH=${PWD}/out \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+            -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+          cmake --build build_test
+      
+      - name: Run Tests
+        run: |
+          export LD_LIBRARY_PATH=${PWD}/out/lib:$LD_LIBRARY_PATH
+          ./build_test/cmake-test || true
+          ./build_coverage/bin/glewinfo -version || true
+          ./build_coverage/bin/visualinfo || true
+      
+
+
