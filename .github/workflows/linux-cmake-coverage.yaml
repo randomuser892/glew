@@ -8,7 +8,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudoapt install -y cmake ninja-build libxmu-dev libxi-dev libgl-dev libegl1-mesa-dev dos2unix gcovr lcov
+          sudo apt install -y cmake ninja-build libxmu-dev libxi-dev libgl-dev libegl1-mesa-dev dos2unix gcovr lcov
       
       - name: Git Checkout
         uses: actions/checkout@v4
