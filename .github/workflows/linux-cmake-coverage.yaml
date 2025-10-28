@@ -37,7 +37,7 @@ jobs:
       
       - name: Build Test Program
         run: |
-          cmake -H build/cmake/testbuild -B build_test \
+          cmake -S build/cmake/testbuild -B build_test \
             -DCMAKE_PREFIX_PATH=${PWD}/out \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
